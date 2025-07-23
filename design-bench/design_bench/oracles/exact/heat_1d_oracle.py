@@ -3,7 +3,7 @@ from design_bench.datasets.continuous_dataset import ContinuousDataset
 from design_bench.datasets.continuous.heat_1d_dataset import Heat1DDataset
 import numpy as np
 import sys
-import os
+import os, pdb
 
 sys.path.append("/home/ubuntu/codebase/")
 from ExPO.generation.simulator import Simulator
@@ -64,7 +64,7 @@ class Heat1DOracle(ExactOracle):
         """
         return True
 
-    def protected_predict(self, x):
+    def protected_predict(self, x, observation=None):
         """Core prediction function that evaluates simulation parameters
         
         Arguments:
@@ -83,17 +83,23 @@ class Heat1DOracle(ExactOracle):
         n_space = int(x[1])
         
         # Validate parameter ranges
-        if not (0.05 <= cfl <= 1.5):
+        if not (0.01 <= cfl <= 1.5):
+            pdb.set_trace()
             return np.array([0.0], dtype=np.float32)
         
-        if not (20 <= n_space <= 500):
+        if not (10 <= n_space <= 500):
+            pdb.set_trace()
             return np.array([0.0], dtype=np.float32)
         
         try:
             # Evaluate using simulator
             params = {"cfl": cfl, "n_space": n_space}
+            #pdb.set_trace()
+            if observation is not None:
+                self.set_profile(f"p{observation}")
+            else:
+                self.set_profile(f"p{np.random.randint(1, 11)}")
             metric_score = self.simulator.metric(params=params)
-            
             return np.array([metric_score], dtype=np.float32)
             
         except Exception as e:
@@ -118,6 +124,7 @@ class Heat1DOracle(ExactOracle):
         results = np.zeros((batch_size, 1), dtype=np.float32)
         
         for i in range(batch_size):
+            #pdb.set_trace()
             results[i] = self.protected_predict(x_batch[i])
         
         return results

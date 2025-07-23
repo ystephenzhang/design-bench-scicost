@@ -73,7 +73,9 @@ class Heat1DDataset(ContinuousDataset):
             download_method="direct") for file in HEAT_1D_FILES]
 
     @staticmethod
-    def generate_data(num_samples=1000, save_dir="/home/ubuntu/codebase/design-bench/design-bench/design_bench_data/heat_1d_data"):
+    def generate_data(num_samples=1000,
+                      save_dir="/home/ubuntu/codebase/design-bench/design-bench/design_bench_data/heat_1d_data",
+                      profiles=None):
         """Generate synthetic dataset by sampling parameter combinations
         and evaluating them using the Simulator
         
@@ -100,7 +102,8 @@ class Heat1DDataset(ContinuousDataset):
         n_space_min, n_space_max = 30, 300
         
         # Heat transfer profiles
-        profiles = [f"p{i}" for i in range(1, 11)]
+        if not profiles:
+            profiles = [f"p{i}" for i in range(1,11)]
         samples_per_profile = num_samples // len(profiles)
         
         all_x = []

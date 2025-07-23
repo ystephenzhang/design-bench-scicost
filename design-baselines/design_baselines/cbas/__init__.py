@@ -156,7 +156,8 @@ def cbas(config):
     np.save(os.path.join(config["logging_dir"],
                          f"solution.npy"), x_t.numpy())
     if config["do_evaluation"]:
-        score = task.predict(x_t)
+        score = task.predict(x_t, test_time=False)
+        #score = task.predict(x_t, observation = np.random.randint(1, 11, size=x_t.shape[0])) # Build random observations
         if task.is_normalized_y:
             score = task.denormalize_y(score)
         try: 

@@ -456,7 +456,7 @@ class OracleBuilder(abc.ABC):
 
         return y_batch
 
-    def predict(self, x_batch, dataset=None, **kwargs):
+    def predict(self, x_batch, dataset=None, test_time=False, **kwargs):
         """a function that accepts a batch of design values 'x' as input and
         for each design computes a prediction value 'y' which corresponds
         to the score in a model-based optimization problem
@@ -489,6 +489,7 @@ class OracleBuilder(abc.ABC):
         y_batch = []
 
         from tqdm import tqdm
+        import pdb
         # iterate through all possible read positions in x_batch
         for read_position in tqdm(range(int(
                 math.ceil(x_batch.shape[0] / batch_size)))):
@@ -496,10 +497,8 @@ class OracleBuilder(abc.ABC):
 
             # slice out a batch_size portion of x_batch
             x_sliced = x_batch[read_position:read_position + batch_size]
-
             # convert from the dataset format to the oracle format
             x_sliced = self.dataset_to_oracle_x(x_sliced, dataset=dataset)
-
             # the feature extractor returns NaN if a design is off-manifold
             mask = np.any(np.isnan(x_sliced), axis=tuple(
                 range(1, len(x_sliced.shape))))[:, np.newaxis]
@@ -515,7 +514,8 @@ class OracleBuilder(abc.ABC):
             y_sliced = np.mean([self.protected_predict(
                 x_sliced, **kwargs) for _ in
                 range(self.internal_measurements)], axis=0)
-
+            if test_time:
+                pdb.set_trace() 
             # if the inner score function is nto batched then add back
             # an outermost batch dimension of one
             if not self.is_batched:
